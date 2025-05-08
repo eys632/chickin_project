@@ -10,9 +10,9 @@ from datetime import datetime
 # =========================
 # 설정값
 # =========================
-VIDEO_PATH = "/home/nas/data/YeonSeung/chicken_7min.mp4"
-MODEL_PATH = "/home/a202192020/객체탐지 프로젝트(송교수님)/양륜비박사님모델/weights/best.pt"
-BASE_DIR = "/home/a202192020/객체탐지 프로젝트(송교수님)/chicken_proj"
+VIDEO_PATH = "비디오파일경로입력"
+MODEL_PATH = "모델파일경로입력"
+BASE_DIR = "결과 저장되는경로"
 FRAME_INTERVAL_SEC = 60
 FRAME_BATCH = 100
 TOLERANCE_RADIUS = 3  # 중앙점 기준 반지름 (지름 = 6픽셀 허용)
