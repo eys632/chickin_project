@@ -3,7 +3,6 @@
 닭 사육장에서 촬영한 영상을 분석하여 **움직이지 않는 닭(사망 추정)**을 자동으로 탐지하고, 그 좌표와 ID를 기록하는 프로젝트입니다.  
 영상은 3x3 그리드로 분할되며, 각각의 영역에 YOLO 모델을 적용하여 객체를 감지하고, 일정 시간 동안 움직이지 않으면 죽은 닭으로 판단하여 CSV에 기록합니다.
 ## 시스템 구조
-```
 <svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
   <!-- 배경 -->
   <rect width="800" height="600" fill="#f8f9fa" />
@@ -117,7 +116,6 @@
   <path d="M250 300 L250 355 L300 355" stroke="#17a2b8" stroke-width="2" stroke-dasharray="5,5" fill="none" />
   <path d="M250 300 L250 475 L300 475" stroke="#17a2b8" stroke-width="2" stroke-dasharray="5,5" fill="none" />
 </svg>
-```
 ## 📂 프로젝트 구조 (0513 폴더 기준)
 ```
 ├── main.py # 전체 실행 파이프라인
