@@ -2,7 +2,122 @@
 
 닭 사육장에서 촬영한 영상을 분석하여 **움직이지 않는 닭(사망 추정)**을 자동으로 탐지하고, 그 좌표와 ID를 기록하는 프로젝트입니다.  
 영상은 3x3 그리드로 분할되며, 각각의 영역에 YOLO 모델을 적용하여 객체를 감지하고, 일정 시간 동안 움직이지 않으면 죽은 닭으로 판단하여 CSV에 기록합니다.
-
+## 시스템 구조
+```
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경 -->
+  <rect width="800" height="600" fill="#f8f9fa" />
+  
+  <!-- 제목 -->
+  <text x="400" y="40" font-family="Arial" font-size="24" text-anchor="middle" font-weight="bold">움직이지 않는 닭 감지 및 추적 시스템 구조도</text>
+  
+  <!-- 입력 단계 -->
+  <rect x="50" y="80" width="150" height="60" rx="10" fill="#ffcccb" stroke="#ff6b6b" stroke-width="2" />
+  <text x="125" y="115" font-family="Arial" font-size="14" text-anchor="middle" font-weight="bold">입력 영상</text>
+  <text x="125" y="135" font-family="Arial" font-size="12" text-anchor="middle">(777.mp4)</text>
+  
+  <!-- 1단계: 영상 분할 -->
+  <rect x="300" y="80" width="200" height="70" rx="10" fill="#c2e0ff" stroke="#0066cc" stroke-width="2" />
+  <text x="400" y="110" font-family="Arial" font-size="14" text-anchor="middle" font-weight="bold">1단계: 영상 분할 (10%)</text>
+  <text x="400" y="130" font-family="Arial" font-size="12" text-anchor="middle">video_splitter.py</text>
+  
+  <!-- 분할 영역 결과 -->
+  <g transform="translate(600, 65)">
+    <rect x="0" y="0" width="30" height="30" fill="#e6f2ff" stroke="#0066cc" stroke-width="1" />
+    <rect x="35" y="0" width="30" height="30" fill="#e6f2ff" stroke="#0066cc" stroke-width="1" />
+    <rect x="70" y="0" width="30" height="30" fill="#e6f2ff" stroke="#0066cc" stroke-width="1" />
+    <rect x="0" y="35" width="30" height="30" fill="#e6f2ff" stroke="#0066cc" stroke-width="1" />
+    <rect x="35" y="35" width="30" height="30" fill="#e6f2ff" stroke="#0066cc" stroke-width="1" />
+    <rect x="70" y="35" width="30" height="30" fill="#e6f2ff" stroke="#0066cc" stroke-width="1" />
+    <rect x="0" y="70" width="30" height="30" fill="#e6f2ff" stroke="#0066cc" stroke-width="1" />
+    <rect x="35" y="70" width="30" height="30" fill="#e6f2ff" stroke="#0066cc" stroke-width="1" />
+    <rect x="70" y="70" width="30" height="30" fill="#e6f2ff" stroke="#0066cc" stroke-width="1" />
+    <text x="50" y="120" font-family="Arial" font-size="12" text-anchor="middle">9개 분할 영역</text>
+  </g>
+  
+  <!-- 화살표: 입력 -> 분할 -->
+  <path d="M200 110 L300 110" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)" />
+  
+  <!-- 화살표: 분할 -> 분할영역 -->
+  <path d="M500 110 L590 110" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)" />
+  
+  <!-- 2단계: YOLO 추론 -->
+  <rect x="300" y="200" width="200" height="70" rx="10" fill="#d7f9d7" stroke="#28a745" stroke-width="2" />
+  <text x="400" y="230" font-family="Arial" font-size="14" text-anchor="middle" font-weight="bold">2단계: YOLO 추론 (40%)</text>
+  <text x="400" y="250" font-family="Arial" font-size="12" text-anchor="middle">yolo_model_loader.py</text>
+  
+  <!-- YOLO 모델 -->
+  <rect x="50" y="205" width="150" height="60" rx="10" fill="#ffe6cc" stroke="#ff9900" stroke-width="2" />
+  <text x="125" y="240" font-family="Arial" font-size="14" text-anchor="middle" font-weight="bold">YOLO 모델</text>
+  <text x="125" y="255" font-family="Arial" font-size="12" text-anchor="middle">(best.pt)</text>
+  
+  <!-- 화살표: 모델 -> YOLO 추론 -->
+  <path d="M200 235 L300 235" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)" />
+  
+  <!-- 화살표: 분할영역 -> YOLO 추론 -->
+  <path d="M650 150 L650 175 L400 175 L400 200" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)" />
+  
+  <!-- 3단계: 움직임 추적 -->
+  <rect x="300" y="320" width="200" height="70" rx="10" fill="#ffefc2" stroke="#ffc107" stroke-width="2" />
+  <text x="400" y="350" font-family="Arial" font-size="14" text-anchor="middle" font-weight="bold">3단계: 움직임 추적 (50%)</text>
+  <text x="400" y="370" font-family="Arial" font-size="12" text-anchor="middle">motion_tracker.py</text>
+  
+  <!-- 화살표: YOLO 추론 -> 움직임 추적 -->
+  <path d="M400 270 L400 320" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)" />
+  
+  <!-- CSV 로깅 모듈 -->
+  <rect x="50" y="390" width="150" height="60" rx="10" fill="#e6e6ff" stroke="#6610f2" stroke-width="2" />
+  <text x="125" y="420" font-family="Arial" font-size="14" text-anchor="middle" font-weight="bold">CSV 로깅</text>
+  <text x="125" y="435" font-family="Arial" font-size="12" text-anchor="middle">csv_logger.py</text>
+  
+  <!-- 화살표: 움직임 추적 -> CSV 로깅 -->
+  <path d="M300 370 L200 370 L200 410 L200 410" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)" />
+  
+  <!-- 4단계: 비디오 병합 -->
+  <rect x="300" y="440" width="200" height="70" rx="10" fill="#f8d7da" stroke="#dc3545" stroke-width="2" />
+  <text x="400" y="470" font-family="Arial" font-size="14" text-anchor="middle" font-weight="bold">4단계: 비디오 병합 및 시각화</text>
+  <text x="400" y="490" font-family="Arial" font-size="12" text-anchor="middle">video_merger.py</text>
+  
+  <!-- 화살표: 움직임 추적 -> 비디오 병합 -->
+  <path d="M400 390 L400 440" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)" />
+  
+  <!-- 결과 영상 -->
+  <rect x="600" y="440" width="150" height="70" rx="10" fill="#d9d9d9" stroke="#343a40" stroke-width="2" />
+  <text x="675" y="465" font-family="Arial" font-size="14" text-anchor="middle" font-weight="bold">결과 영상</text>
+  <text x="675" y="485" font-family="Arial" font-size="11" text-anchor="middle">merged_dead_chickens.mp4</text>
+  <text x="675" y="500" font-family="Arial" font-size="11" text-anchor="middle">part_i_j_processed.mp4</text>
+  
+  <!-- 화살표: 비디오 병합 -> 결과 영상 -->
+  <path d="M500 475 L600 475" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)" />
+  
+  <!-- 결과 CSV 파일 -->
+  <rect x="600" y="360" width="150" height="70" rx="10" fill="#d9d9d9" stroke="#343a40" stroke-width="2" />
+  <text x="675" y="385" font-family="Arial" font-size="14" text-anchor="middle" font-weight="bold">결과 CSV 파일</text>
+  <text x="675" y="405" font-family="Arial" font-size="11" text-anchor="middle">dead_chickens.csv</text>
+  <text x="675" y="420" font-family="Arial" font-size="11" text-anchor="middle">id_mapping.csv</text>
+  
+  <!-- 화살표: CSV 로깅 -> 결과 CSV 파일 -->
+  <path d="M200 410 L250 410 L350 410 L600 395" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)" />
+  
+  <!-- main.py 전체 제어 -->
+  <rect x="300" y="540" width="200" height="40" rx="10" fill="#17a2b8" stroke="#138496" stroke-width="2" />
+  <text x="400" y="565" font-family="Arial" font-size="14" text-anchor="middle" font-weight="bold" fill="white">main.py (전체 제어)</text>
+  
+  <!-- 화살표 마커 정의 -->
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#666" />
+    </marker>
+  </defs>
+  
+  <!-- 연결선: main.py -> 모든 단계 -->
+  <path d="M400 540 L400 520 L250 520 L250 300 L270 300" stroke="#17a2b8" stroke-width="2" stroke-dasharray="5,5" fill="none" />
+  <path d="M250 300 L250 110 L300 110" stroke="#17a2b8" stroke-width="2" stroke-dasharray="5,5" fill="none" />
+  <path d="M250 300 L250 235 L300 235" stroke="#17a2b8" stroke-width="2" stroke-dasharray="5,5" fill="none" />
+  <path d="M250 300 L250 355 L300 355" stroke="#17a2b8" stroke-width="2" stroke-dasharray="5,5" fill="none" />
+  <path d="M250 300 L250 475 L300 475" stroke="#17a2b8" stroke-width="2" stroke-dasharray="5,5" fill="none" />
+</svg>
+```
 ## 📂 프로젝트 구조 (0513 폴더 기준)
 ```
 ├── main.py # 전체 실행 파이프라인
