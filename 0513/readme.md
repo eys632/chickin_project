@@ -81,6 +81,7 @@ python main.py
 ## 수정해야 할 문제점
  - 시간이 지날수록 닭 탐지 오류가 증가함
  - 닭이 아닌 픽셀들을 닭이라고 인식하는 박스가 점점 많아짐
+   
 ![Uploading dW-ezgif.com-video-to-gif-converter-light.gif…]()
 
 
